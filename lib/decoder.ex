@@ -108,7 +108,14 @@ defmodule Jason.Decoder do
       _ in '123456789', rest ->
         number(rest, original, skip, stack, decode, 1)
       _ in '-', rest ->
-        number_minus(rest, original, skip, stack, decode)
+        case rest do
+          <<"Infinity", rest::bits>> ->
+            continue(rest, original, skip + 9, stack, decode, :"-infinity")
+          <<"NaN", rest::bits>> ->
+            continue(rest, original, skip + 4, stack, decode, :nan)
+          <<_::bits>> ->
+          number_minus(rest, original, skip, stack, decode)
+        end
       _ in '"', rest ->
         string(rest, original, skip + 1, stack, decode, 0)
       _ in '[', rest ->
@@ -135,6 +142,20 @@ defmodule Jason.Decoder do
         case rest do
           <<"ull", rest::bits>> ->
             continue(rest, original, skip + 4, stack, decode, nil)
+          <<_::bits>> ->
+            error(original, skip)
+        end
+      _ in 'I', rest ->
+        case rest do
+          <<"nfinity", rest::bits>> ->
+            continue(rest, original, skip + 8, stack, decode, :infinity)
+          <<_::bits>> ->
+            error(original, skip)
+        end
+      _ in 'N', rest ->
+        case rest do
+          <<"aN", rest::bits>> ->
+            continue(rest, original, skip + 3, stack, decode, :nan)
           <<_::bits>> ->
             error(original, skip)
         end

@@ -139,6 +139,9 @@ defmodule Jason.Encode do
   defp encode_atom(nil, _escape), do: "null"
   defp encode_atom(true, _escape), do: "true"
   defp encode_atom(false, _escape), do: "false"
+  defp encode_atom(:nan, _escape), do: "NaN"
+  defp encode_atom(:infinity, _escape), do: "Infinity"
+  defp encode_atom(:"-infinity", _escape), do: "-Infinity"
   defp encode_atom(atom, escape),
     do: encode_string(Atom.to_string(atom), escape)
 

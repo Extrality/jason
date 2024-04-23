@@ -3,6 +3,14 @@ defmodule Jason.JsonTestSuite do
 
   alias Jason.DecodeError
 
+  # Our fork supports these
+  n_succeeds = [
+    "number_NaN.json",
+    "number_-NaN.json",
+    "number_infinity.json",
+    "number_minus_infinity.json"
+  ]
+
   # Implementation-dependent tests
   i_succeeds = [
     "number_double_huge_neg_exp.json",
@@ -51,9 +59,15 @@ defmodule Jason.JsonTestSuite do
           Jason.decode!(File.read!(unquote(path)))
         end
       "n_" <> name ->
-        test name do
-          assert_raise DecodeError, ~r"unexpected", fn ->
+        if name in n_succeeds do
+          test name do
             Jason.decode!(File.read!(unquote(path)))
+          end
+        else
+          test name do
+            assert_raise DecodeError, ~r"unexpected", fn ->
+              Jason.decode!(File.read!(unquote(path)))
+            end
           end
         end
       "i_" <> name ->
